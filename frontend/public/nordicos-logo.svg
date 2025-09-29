@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 600">
+  <!-- Shield outline -->
+  <path d="M50 100 L250 50 L450 100 L450 350 C450 450 350 550 250 580 C150 550 50 450 50 350 Z" 
+        fill="white" stroke="black" stroke-width="8"/>
+  
+  <!-- NORDICOS text -->
+  <text x="250" y="120" text-anchor="middle" font-family="Arial Black" font-size="36" font-weight="bold" fill="black">
+    NORDICOS
+  </text>
+  
+  <!-- FC text -->
+  <text x="250" y="155" text-anchor="middle" font-family="Arial Black" font-size="24" font-weight="bold" fill="black">
+    FC
+  </text>
+  
+  <!-- Viking helmet and axes -->
+  <g transform="translate(250,250)">
+    <!-- Left axe -->
+    <g transform="rotate(-30) translate(-80,0)">
+      <rect x="-5" y="-60" width="10" height="80" fill="black"/>
+      <path d="M-25,-40 Q-35,-50 -25,-60 L5,-45 Q15,-35 5,-25 Z" fill="black"/>
+      <path d="M25,-40 Q35,-50 25,-60 L-5,-45 Q-15,-35 -5,-25 Z" fill="black"/>
+    </g>
+    
+    <!-- Right axe -->
+    <g transform="rotate(30) translate(80,0)">
+      <rect x="-5" y="-60" width="10" height="80" fill="black"/>
+      <path d="M-25,-40 Q-35,-50 -25,-60 L5,-45 Q15,-35 5,-25 Z" fill="black"/>
+      <path d="M25,-40 Q35,-50 25,-60 L-5,-45 Q-15,-35 -5,-25 Z" fill="black"/>
+    </g>
+    
+    <!-- Viking helmet -->
+    <ellipse cx="0" cy="-10" rx="45" ry="35" fill="black"/>
+    <!-- Helmet horns -->
+    <path d="M-35,-25 Q-45,-35 -40,-45 Q-35,-40 -25,-30" fill="black"/>
+    <path d="M35,-25 Q45,-35 40,-45 Q35,-40 25,-30" fill="black"/>
+    
+    <!-- Face -->
+    <ellipse cx="0" cy="0" rx="35" ry="40" fill="black"/>
+    <!-- Eyes -->
+    <ellipse cx="-15" cy="-10" rx="5" ry="8" fill="white"/>
+    <ellipse cx="15" cy="-10" rx="5" ry="8" fill="white"/>
+    <!-- Nose guard -->
+    <rect x="-2" y="-15" width="4" height="20" fill="black"/>
+    
+    <!-- Beard -->
+    <path d="M-25,15 Q-30,25 -25,35 Q-20,45 -10,40 Q0,45 10,40 Q20,45 25,35 Q30,25 25,15 Z" fill="black"/>
+    
+    <!-- Beard pattern -->
+    <path d="M-15,25 Q-10,30 -5,25 Q0,30 5,25 Q10,30 15,25" stroke="white" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- Snowflake -->
+  <g transform="translate(250,420)">
+    <g stroke="black" stroke-width="3" fill="none">
+      <line x1="0" y1="-20" x2="0" y2="20"/>
+      <line x1="-17" y1="-10" x2="17" y2="10"/>
+      <line x1="-17" y1="10" x2="17" y2="-10"/>
+      <line x1="-5" y1="-15" x2="5" y2="-25"/>
+      <line x1="-5" y1="15" x2="5" y2="25"/>
+      <line x1="-12" y1="-5" x2="-22" y2="-15"/>
+      <line x1="12" y1="5" x2="22" y2="15"/>
+      <line x1="-12" y1="5" x2="-22" y2="15"/>
+      <line x1="12" y1="-5" x2="22" y2="-15"/>
+    </g>
+  </g>
+</svg>
