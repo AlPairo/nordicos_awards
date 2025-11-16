@@ -1,8 +1,13 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
-const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const {
+  createUser,
+  findUserWithPassword,
+  findUserByUsernameOrEmail,
+  comparePassword
+} = require('../services/users');
 
 const router = express.Router();
 
@@ -40,10 +45,7 @@ router.post('/register', [
 
     const { username, email, password } = req.body;
 
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }]
-    });
-
+    const existingUser = await findUserByUsernameOrEmail({ username, email });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -51,27 +53,15 @@ router.post('/register', [
       });
     }
 
-    const user = new User({
-      username,
-      email,
-      password
-    });
-
-    await user.save();
-
-    const token = generateToken(user._id);
+    const user = await createUser({ username, email, password });
+    const token = generateToken(user.id);
 
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
         token,
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
+        user
       }
     });
   } catch (error) {
@@ -86,10 +76,9 @@ router.post('/register', [
 router.post('/token', [
   body('username')
     .notEmpty()
-    .withMessage('Username is required'),
+    .withMessage('Username or email is required'),
   body('password')
     .notEmpty()
-    .withMessage('Password is required')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -103,21 +92,13 @@ router.post('/token', [
 
     const { username, password } = req.body;
 
-    console.log('Login attempt:', { username, passwordProvided: !!password });
-
-    const user = await User.findOne({
-      $or: [{ username }, { email: username }]
-    });
-
+    const user = await findUserWithPassword(username);
     if (!user) {
-      console.log('User not found:', username);
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
       });
     }
-
-    console.log('User found:', { id: user._id, username: user.username, hasPassword: !!user.password });
 
     if (!user.isActive) {
       return res.status(401).json({
@@ -126,7 +107,7 @@ router.post('/token', [
       });
     }
 
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await comparePassword(password, user.passwordHash);
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
@@ -134,7 +115,8 @@ router.post('/token', [
       });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user.id);
+    const { passwordHash, ...safeUser } = user;
 
     res.json({
       success: true,
@@ -142,12 +124,7 @@ router.post('/token', [
       data: {
         access_token: token,
         token_type: 'bearer',
-        user: {
-          id: user._id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
+        user: safeUser
       }
     });
   } catch (error) {
@@ -164,14 +141,7 @@ router.get('/me', auth, async (req, res) => {
     res.json({
       success: true,
       data: {
-        user: {
-          id: req.user._id,
-          username: req.user.username,
-          email: req.user.email,
-          role: req.user.role,
-          isActive: req.user.isActive,
-          createdAt: req.user.createdAt
-        }
+        user: req.user
       }
     });
   } catch (error) {

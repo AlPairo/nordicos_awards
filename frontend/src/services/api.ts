@@ -171,6 +171,10 @@ export const media = {
     return response.data.data;
   },
 
+  adminDelete: async (mediaId: string): Promise<void> => {
+    await api.delete(`/media/admin/${mediaId}`);
+  },
+
   delete: async (id: string): Promise<void> => {
     await api.delete(`/media/${id}`);
   },

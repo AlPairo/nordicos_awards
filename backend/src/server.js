@@ -1,5 +1,16 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+const fs = require('fs');
+
+const rootEnvPath = path.join(__dirname, '..', '..', '.env');
+const serviceEnvPath = path.join(__dirname, '..', '.env');
+const resolvedEnvPath = [rootEnvPath, serviceEnvPath].find(fs.existsSync);
+
+if (resolvedEnvPath) {
+  require('dotenv').config({ path: resolvedEnvPath });
+} else {
+  require('dotenv').config();
+}
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
@@ -39,21 +50,24 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
+const parseOrigins = (value = '') =>
+  value
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+const defaultOrigins = ['http://localhost:8000', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+const configuredOrigins = parseOrigins(process.env.CORS_ORIGIN);
+const allowedOrigins = Array.from(new Set([...configuredOrigins, ...defaultOrigins]));
+const allowAllOrigins = allowedOrigins.includes('*');
+
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      process.env.CORS_ORIGIN || 'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://localhost:3001'
-    ];
-    
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    if (!origin || allowAllOrigins || allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
+
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -65,7 +79,10 @@ app.use(cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+const uploadsPath = path.join(__dirname, '../uploads');
+const frontendBuildPath = path.join(__dirname, '..', '..', 'frontend', 'build');
+
+app.use('/uploads', express.static(uploadsPath));
 
 app.get('/health', (req, res) => {
   res.json({
@@ -82,7 +99,11 @@ app.use('/api/nominees', nomineeRoutes);
 app.use('/api/votes', voteRoutes);
 app.use('/api/media', mediaRoutes);
 
-app.get('/', (req, res) => {
+app.get('/', (req, res, next) => {
+  if (fs.existsSync(frontendBuildPath)) {
+    return res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  }
+
   res.json({
     success: true,
     message: 'Welcome to Nordicos Awards API',
@@ -91,6 +112,18 @@ app.get('/', (req, res) => {
     health: '/health'
   });
 });
+
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.originalUrl.startsWith('/api') || req.originalUrl.startsWith('/uploads')) {
+      return next();
+    }
+
+    return res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+}
 
 app.use('*', (req, res) => {
   res.status(404).json({

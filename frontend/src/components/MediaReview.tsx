@@ -68,6 +68,23 @@ const MediaReview: React.FC = () => {
     }
   };
 
+  const handleAdminDelete = async () => {
+    if (!selectedMedia) return;
+    try {
+      setReviewing(true);
+      await media.adminDelete(selectedMedia.id);
+      setUploads(prev => prev.filter(upload => upload.id !== selectedMedia.id));
+      setReviewDialog(false);
+      setSelectedMedia(null);
+      setAdminNotes('');
+    } catch (err: any) {
+      console.error('Error deleting media:', err);
+      setError(err.response?.data?.detail || 'Error al eliminar el archivo');
+    } finally {
+      setReviewing(false);
+    }
+  };
+
   const openReviewDialog = (upload: MediaUpload) => {
     setSelectedMedia(upload);
     setAdminNotes(upload.admin_notes || '');
@@ -230,6 +247,13 @@ const MediaReview: React.FC = () => {
         <DialogActions>
           <Button onClick={() => setReviewDialog(false)} disabled={reviewing}>
             Cancelar
+          </Button>
+          <Button 
+            onClick={handleAdminDelete}
+            color="error"
+            disabled={reviewing}
+          >
+            Eliminar
           </Button>
           <Button 
             onClick={() => handleReview('rejected')} 

@@ -154,6 +154,32 @@ const NomineeManagement: React.FC = () => {
     setSelectedMedia(null);
   };
 
+  const handleAdminDeleteMedia = async (mediaItem: MediaUpload) => {
+    const confirmDelete = window.confirm(`¿Eliminar definitivamente "${mediaItem.original_filename}"?`);
+    if (!confirmDelete) return;
+    try {
+      await media.adminDelete(mediaItem.id);
+      setApprovedMedia(prev => prev.filter(item => item.id !== mediaItem.id));
+      setNomineesData(prev => prev.map(nominee => {
+        if (nominee.linked_media && typeof nominee.linked_media === 'object' && nominee.linked_media.id === mediaItem.id) {
+          return {
+            ...nominee,
+            linked_media: undefined,
+            imageUrl: undefined,
+            image_url: undefined
+          };
+        }
+        return nominee;
+      }));
+      if (selectedMedia?.id === mediaItem.id) {
+        setSelectedMedia(null);
+      }
+    } catch (err: any) {
+      console.error('Error deleting media:', err);
+      setError(err.response?.data?.detail || 'Error al eliminar el archivo aprobado');
+    }
+  };
+
   const getCategoryName = (categoryId: string) => {
     const category = categoriesData.find(cat => cat.id === categoryId);
     return category ? category.name : 'Categoría no encontrada';
@@ -373,6 +399,8 @@ const NomineeManagement: React.FC = () => {
         selectedMediaId={selectedMedia?.id}
         mediaItems={approvedMedia}
         loading={loading}
+        allowDelete
+        onDelete={handleAdminDeleteMedia}
       />
     </Box>
   );

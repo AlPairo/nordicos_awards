@@ -1,0 +1,27 @@
+{
+  "name": "nordicos-awards-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nordicos Awards monorepo for backend, frontend, and shared tooling",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:backend": "npm install --workspace backend",
+    "install:frontend": "npm install --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run start --workspace frontend",
+    "dev": "concurrently \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "build": "npm run build:frontend",
+    "build:frontend": "npm run build --workspace frontend",
+    "start": "npm run start:backend",
+    "start:backend": "npm run start --workspace backend",
+    "deploy": "npm run build && npm start",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

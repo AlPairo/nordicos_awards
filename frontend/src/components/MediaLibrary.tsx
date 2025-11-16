@@ -28,6 +28,7 @@ import {
   Image as ImageIcon,
   VideoLibrary,
   Check,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { MediaUpload } from '../types';
 
@@ -38,6 +39,8 @@ interface MediaLibraryProps {
   selectedMediaId?: string;
   mediaItems: MediaUpload[];
   loading?: boolean;
+  allowDelete?: boolean;
+  onDelete?: (media: MediaUpload) => Promise<void> | void;
 }
 
 const MediaLibrary: React.FC<MediaLibraryProps> = ({
@@ -47,6 +50,8 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({
   selectedMediaId,
   mediaItems,
   loading = false,
+  allowDelete = false,
+  onDelete,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [mediaTypeFilter, setMediaTypeFilter] = useState<'all' | 'photo' | 'video'>('all');
@@ -229,17 +234,42 @@ const MediaLibrary: React.FC<MediaLibraryProps> = ({
                       </Box>
                     )}
                     
-                    <Chip
-                      icon={getMediaTypeIcon(media.media_type)}
-                      label={media.media_type === 'photo' ? 'Foto' : 'Video'}
-                      size="small"
+                    <Box
                       sx={{
                         position: 'absolute',
                         top: 8,
                         right: 8,
-                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        display: 'flex',
+                        gap: 1,
+                        alignItems: 'center'
                       }}
-                    />
+                    >
+                      {allowDelete && onDelete && (
+                        <IconButton
+                          size="small"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDelete(media);
+                          }}
+                          sx={{
+                            backgroundColor: 'rgba(255,255,255,0.9)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255,255,255,1)'
+                            }
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                      <Chip
+                        icon={getMediaTypeIcon(media.media_type)}
+                        label={media.media_type === 'photo' ? 'Foto' : 'Video'}
+                        size="small"
+                        sx={{
+                          backgroundColor: 'rgba(255,255,255,0.9)',
+                        }}
+                      />
+                    </Box>
                     
                     {selectedMediaId === media.id && (
                       <Box sx={{

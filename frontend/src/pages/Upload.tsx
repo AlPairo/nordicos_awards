@@ -38,6 +38,18 @@ const Upload: React.FC = () => {
   const [loadingUploads, setLoadingUploads] = useState(false);
   const [tabValue, setTabValue] = useState(0);
 
+  const handleDeleteUpload = async (upload: MediaUpload) => {
+    const confirmDelete = window.confirm(`¿Eliminar "${upload.original_filename}"? Esta acción no se puede deshacer.`);
+    if (!confirmDelete) return;
+    try {
+      await media.delete(upload.id);
+      setMyUploads(prev => prev.filter(item => item.id !== upload.id));
+    } catch (err: any) {
+      console.error('Error deleting upload:', err);
+      setError(err.response?.data?.detail || 'Error al eliminar el archivo');
+    }
+  };
+
   useEffect(() => {
     const loadMyUploads = async () => {
       if (!user) return;
@@ -307,7 +319,7 @@ const Upload: React.FC = () => {
                 }}
               >
                 {myUploads.map((upload) => (
-                  <Card key={upload.id}>
+                  <Card key={upload.id} sx={{ position: 'relative' }}>
                     {upload.media_type === 'photo' ? (
                       <CardMedia
                         component="img"
@@ -340,6 +352,13 @@ const Upload: React.FC = () => {
                     )}
                     
                     <CardContent>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteUpload(upload)}
+                        sx={{ position: 'absolute', top: 8, right: 8 }}
+                      >
+                        <Delete />
+                      </IconButton>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                         {getStatusIcon(upload.status)}
                         <Chip 
