@@ -20,7 +20,7 @@ const Register: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterData & { confirmPassword: string }>();
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterData & { confirmPassword: string }>();
 
   const onSubmit = async (data: RegisterData & { confirmPassword: string }) => {
     if (data.password !== data.confirmPassword) {

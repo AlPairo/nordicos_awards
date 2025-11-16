@@ -26,7 +26,7 @@ import { Category } from '../types';
 
 const CategoryManagement: React.FC = () => {
   const [categoriesData, setCategoriesData] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
