@@ -26,7 +26,7 @@ import { Category } from '../types';
 
 const CategoryManagement: React.FC = () => {
   const [categoriesData, setCategoriesData] = useState<Category[]>([]);
-  const [setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
@@ -39,18 +39,22 @@ const CategoryManagement: React.FC = () => {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadCategories = async () => {
     try {
-      setLoading(true);
+      if (!loading) {
+        setLoading(true);
+      }
       const data = await categories.getAll(undefined, false);
       setCategoriesData(data);
     } catch (err: any) {
       console.error('Error loading categories:', err);
       setError('Error al cargar las categorías');
     } finally {
-      setLoading(false);
+      if (loading) {
+        setLoading(false);
+      }
     }
   };
 
